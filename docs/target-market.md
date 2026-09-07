@@ -57,4 +57,12 @@ The AI should position the supplier around:
 - Product customization / OEM capability only when actually supported by the supplier.
 - Sample-first or quotation-first conversations where appropriate.
 
-All outbound messages must be reviewable by a human before sending in the MVP.
+## Mandatory contact information
+
+Every outbound development message must include the following contact information exactly:
+
+**WhatsApp: +8613553392168**
+
+This contact must appear in the initial development email and every automated follow-up message. It must not be omitted, altered, reformatted into a different number, or replaced by another contact method unless the user explicitly changes the contact information.
+
+Automated outbound messages do not require manual approval when the lead meets the configured qualification and compliance rules. Messages must still use reliable evidence, avoid fabricated claims, respect suppression/opt-out rules, and remain within configured sending limits.
