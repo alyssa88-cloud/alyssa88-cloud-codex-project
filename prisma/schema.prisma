@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  DISCOVERED
+  QUALIFIED
+  RESEARCHED
+  DRAFTED
+  APPROVED
+  CONTACTED
+  REPLIED
+  OPPORTUNITY
+  WON
+  LOST
+  DISQUALIFIED
+}
+
+enum ActivityType {
+  DISCOVERY
+  RESEARCH
+  OUTREACH_DRAFTED
+  OUTREACH_SENT
+  REPLY
+  NOTE
+  STATUS_CHANGE
+}
+
+model Workspace {
+  id        String       @id @default(cuid())
+  name      String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  users     User[]
+  icps      ICPProfile[]
+  companies Company[]
+  leads     Lead[]
+  activities Activity[]
+}
+
+model User {
+  id          String    @id @default(cuid())
+  workspaceId String
+  email       String    @unique
+  name        String?
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model ICPProfile {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  name         String
+  countries    Json
+  industries   Json
+  companySizes Json
+  buyerRoles   Json
+  keywords     Json
+  exclusions   Json
+  rules        Json
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  searchJobs   SearchJob[]
+}
+
+model SearchJob {
+  id          String     @id @default(cuid())
+  workspaceId String
+  icpId       String
+  status      String     @default("PENDING")
+  query       Json
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime   @default(now())
+  icp         ICPProfile @relation(fields: [icpId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  name           String
+  website        String?
+  country        String?
+  industry       String?
+  description    String?
+  sourceUrl      String?
+  sourceType     String?
+  sourceRetrievedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contacts       Contact[]
+  leads          Lead[]
+  @@index([workspaceId, name])
+}
+
+model Contact {
+  id         String   @id @default(cuid())
+  companyId  String
+  name       String?
+  role       String?
+  email      String?
+  phone      String?
+  linkedinUrl String?
+  sourceUrl  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  leads      Lead[]
+}
+
+model Lead {
+  id          String     @id @default(cuid())
+  workspaceId String
+  companyId   String
+  contactId   String?
+  status      LeadStatus @default(DISCOVERED)
+  score       Int?
+  scoreReason String?
+  aiSummary   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  company     Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contact     Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  evidence    LeadEvidence[]
+  messages    OutreachMessage[]
+  activities  Activity[]
+  @@index([workspaceId, status])
+  @@index([companyId])
+}
+
+model LeadEvidence {
+  id        String   @id @default(cuid())
+  leadId    String
+  sourceUrl String
+  sourceType String?
+  claim     String
+  excerpt   String?
+  createdAt DateTime @default(now())
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+model OutreachSequence {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  messages    OutreachMessage[]
+}
+
+model OutreachMessage {
+  id          String   @id @default(cuid())
+  leadId      String
+  sequenceId  String?
+  channel     String
+  subject     String?
+  body        String
+  status      String   @default("DRAFT")
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  providerMessageId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  sequence    OutreachSequence? @relation(fields: [sequenceId], references: [id], onDelete: SetNull)
+}
+
+model Activity {
+  id          String       @id @default(cuid())
+  workspaceId String
+  leadId      String?
+  type        ActivityType
+  metadata    Json
+  createdAt   DateTime     @default(now())
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead        Lead?        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  @@index([workspaceId, createdAt])
+}
