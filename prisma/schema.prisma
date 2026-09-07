@@ -161,6 +161,7 @@ model OutreachMessage {
   id          String   @id @default(cuid())
   leadId      String
   sequenceId  String?
+  sequenceStep Int?
   channel     String
   subject     String?
   body        String
@@ -183,7 +184,7 @@ model EmailIntegration {
   id                  String   @id @default(cuid())
   workspaceId         String
   provider             String
-  email                String
+  email               String
   accessTokenEncrypted String
   refreshTokenEncrypted String?
   expiresAt            DateTime?
