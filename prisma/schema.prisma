@@ -41,6 +41,7 @@ model Workspace {
   companies Company[]
   leads     Lead[]
   activities Activity[]
+  emailIntegrations EmailIntegration[]
 }
 
 model User {
@@ -167,10 +168,29 @@ model OutreachMessage {
   scheduledAt DateTime?
   sentAt      DateTime?
   providerMessageId String?
+  providerThreadId String?
+  replyDetectedAt DateTime?
+  stopReason String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
   sequence    OutreachSequence? @relation(fields: [sequenceId], references: [id], onDelete: SetNull)
+  @@index([status, scheduledAt])
+  @@index([providerThreadId])
+}
+
+model EmailIntegration {
+  id                  String   @id @default(cuid())
+  workspaceId         String
+  provider             String
+  email                String
+  accessTokenEncrypted String
+  refreshTokenEncrypted String?
+  expiresAt            DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  workspace            Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  @@unique([workspaceId, provider])
 }
 
 model Activity {
