@@ -5,20 +5,19 @@ import { decryptToken } from "@/lib/email/token-crypto";
 
 function authorized(request: Request) {
   const secret = process.env.CRON_SECRET;
-  return Boolean(secret && request.headers.get("authorization") === `Bearer ${secret}`);
+  if (!secret) return false;
+  const authorization = request.headers.get("authorization");
+  const cronHeader = request.headers.get("x-cron-secret");
+  return authorization === `Bearer ${secret}` || cronHeader === secret;
 }
 
-export async function POST(request: Request) {
+async function run(request: Request) {
   if (!authorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const now = new Date();
-  const messages = await prisma.outreachMessage.findMany({
-    where: { status: "SCHEDULED", scheduledAt: { lte: now }, channel: "email" },
-    include: { lead: { include: { contact: true } } },
-    take: 50,
-  });
-
+  const messages = await prisma.outreachMessage.findMany({ where: { status: "SCHEDULED", scheduledAt: { lte: now }, channel: "email" }, include: { lead: { include: { contact: true } } }, take: 50 });
   let sent = 0;
   let skipped = 0;
+
   for (const message of messages) {
     const email = message.lead.contact?.email?.trim();
     if (!email || message.lead.status === "REPLIED" || message.lead.status === "DISQUALIFIED" || message.stopReason) {
@@ -26,10 +25,8 @@ export async function POST(request: Request) {
       await prisma.outreachMessage.update({ where: { id: message.id }, data: { status: "STOPPED", stopReason: !email ? "missing_email" : "lead_not_contactable" } });
       continue;
     }
-
     const integration = await prisma.emailIntegration.findUnique({ where: { workspaceId_provider: { workspaceId: message.lead.workspaceId, provider: "microsoft" } } });
     if (!integration) { skipped++; continue; }
-
     try {
       await sendMicrosoftGraphMail({ accessToken: decryptToken(integration.accessTokenEncrypted), to: email, subject: message.subject || "Quick question", htmlBody: message.body });
       await prisma.outreachMessage.update({ where: { id: message.id }, data: { status: "SENT", sentAt: now } });
@@ -40,6 +37,8 @@ export async function POST(request: Request) {
       await prisma.outreachMessage.update({ where: { id: message.id }, data: { status: "FAILED", stopReason: error instanceof Error ? error.message.slice(0, 500) : "send_failed" } });
     }
   }
-
   return NextResponse.json({ ok: true, processed: messages.length, sent, skipped, checkedAt: now.toISOString() });
 }
+
+export async function GET(request: Request) { return run(request); }
+export async function POST(request: Request) { return run(request); }
