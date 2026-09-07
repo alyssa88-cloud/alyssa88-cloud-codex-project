@@ -2,8 +2,8 @@
   "name": "ai-customer-acquisition-platform",
   "private": true,
   "version": "0.1.0",
-  "packageManager": "pnpm@10.15.0",
-  "engines": { "node": ">=20" },
+  "packageManager": "pnpm@9.15.9",
+  "engines": { "node": "22.x" },
   "scripts": {
     "dev": "pnpm --filter web dev",
     "build": "pnpm -r build",
