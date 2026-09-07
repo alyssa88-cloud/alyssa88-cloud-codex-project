@@ -1,0 +1,19 @@
+{
+  "name": "ai-customer-acquisition-platform",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.15.0",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "db:generate": "pnpm --filter @app/database prisma:generate",
+    "db:migrate": "pnpm --filter @app/database prisma:migrate"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
