@@ -9,42 +9,32 @@ Build a practical B2B lead-generation assistant for a lingerie/apparel manufactu
 1. User creates an ICP.
 2. User starts a lead discovery job.
 3. System stores discovered companies and evidence.
-4. AI normalizes and scores leads.
-5. User reviews a lead detail page.
-6. AI creates a personalized outreach draft from verified evidence.
-7. User edits and approves the message.
-8. System records the outreach and schedules a follow-up task.
+4. AI normalizes, deduplicates, and scores leads.
+5. Qualified leads with a verified business contact email enter an automated outreach sequence.
+6. AI creates a personalized outreach message from verified evidence.
+7. System sends the message automatically through the connected Microsoft mailbox.
+8. System monitors replies and stops the sequence when a reply, rejection, unsubscribe, or invalid address is detected.
+9. System schedules follow-ups and notifications through the connected mailbox.
 
-## MVP screens
+## Automated outreach rules
 
-- Dashboard
-- ICP / Campaign setup
-- Lead discovery
-- Lead list
-- Lead detail
-- Outreach draft / review
-- Follow-up queue
-- Settings
+- No manual approval is required for leads that satisfy campaign qualification rules.
+- Only use permitted business contact information and reliable source evidence.
+- Deduplicate by company/contact/email before sending.
+- Do not send when email is missing, invalid, suppressed, or already contacted under the same campaign.
+- Apply mailbox/domain rate limits and a daily sending cap.
+- Stop follow-ups on reply, rejection, unsubscribe/opt-out, or invalid address.
+- Keep a suppression list so opted-out contacts are never re-added.
+- Log sends, provider message IDs, errors, and stop reasons.
 
-## Lead fields
+## Default follow-up sequence
 
-- Company name
-- Website
-- Country
-- Industry
-- Customer type
-- Product categories
-- Description
-- Lead score
-- Score reasons
-- Evidence / source URLs
-- Contact name
-- Contact role
-- Contact email (when available from permitted sources)
-- Contact source
-- Lead status
-- Last activity
-- Next follow-up
+- Initial outreach: Day 0
+- First follow-up: 5 business days later
+- Second follow-up: 7 business days after the first follow-up
+- Stop after the second follow-up unless a campaign explicitly defines another compliant sequence.
+
+The deployed app should use Microsoft Graph OAuth for long-running email sending and scheduled jobs. The ChatGPT Outlook connector is useful for interactive mailbox operations but does not itself authorize a deployed web app.
 
 ## AI tasks
 
@@ -62,7 +52,7 @@ Return a structured score from 0-100 and concise reasons tied to evidence.
 
 ### Outreach personalization
 
-Generate an email draft that references only verified company/product information. Never fabricate a relationship, order history, product need, or business fact.
+Generate email using only verified company/product information. Never fabricate a relationship, order history, product need, business fact, contact detail, or previous interaction.
 
 ## Safety and compliance
 
@@ -70,9 +60,20 @@ Generate an email draft that references only verified company/product informatio
 - Use permitted public business information and user-provided data.
 - Provide source attribution for lead evidence.
 - Avoid harvesting sensitive personal data.
-- Keep outbound sending behind explicit user approval in the MVP.
-- Include unsubscribe / opt-out handling in the outreach design before automated sending is enabled.
+- Respect applicable email marketing, privacy, and platform rules for the target market.
+- Include unsubscribe / opt-out handling before automated sending.
+
+## MVP screens
+
+- Dashboard
+- ICP / Campaign setup
+- Lead discovery
+- Lead list
+- Lead detail
+- Outreach settings
+- Follow-up queue
+- Email integration / Settings
 
 ## MVP success criteria
 
-A user can define the target market, review a ranked list of candidate companies, inspect the evidence behind each score, generate a personalized outreach draft, approve it, and track the next follow-up.
+A user can define the target market, rank candidate companies, inspect evidence, enable automated outreach, connect a Microsoft mailbox, automatically contact qualified leads, stop sequences based on replies/opt-outs/errors, and track follow-ups and outcomes.
