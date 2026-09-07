@@ -7,7 +7,7 @@
   "scripts": {
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:setup": "prisma generate && prisma db push --accept-data-loss=false && node ./bootstrap.cjs",
+    "prisma:setup": "prisma generate && prisma db push && node ./bootstrap.cjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
