@@ -26,13 +26,19 @@ Build a practical B2B lead-generation assistant for a lingerie/apparel manufactu
 - Stop follow-ups on reply, rejection, unsubscribe/opt-out, or invalid address.
 - Keep a suppression list so opted-out contacts are never re-added.
 - Log sends, provider message IDs, errors, and stop reasons.
+- Every outbound development message and automated follow-up must include the configured business contact: **WhatsApp: +8613553392168**.
 
 ## Default follow-up sequence
 
 - Initial outreach: Day 0
-- First follow-up: 5 business days later
-- Second follow-up: 7 business days after the first follow-up
-- Stop after the second follow-up unless a campaign explicitly defines another compliant sequence.
+- First follow-up: 2 business days after the initial outreach
+- Second follow-up: 5 business days after the first follow-up
+- Third follow-up: 7 business days after the second follow-up
+- Fourth follow-up: 15 business days after the third follow-up
+- Fifth follow-up: 30 business days after the fourth follow-up
+- Stop after the fifth follow-up unless a campaign explicitly defines another compliant sequence.
+
+All intervals are measured in business days using the campaign's configured business timezone/calendar. A reply, rejection, unsubscribe/opt-out, invalid address, or other configured stop condition cancels all future scheduled follow-ups.
 
 The deployed app should use Microsoft Graph OAuth for long-running email sending and scheduled jobs. The ChatGPT Outlook connector is useful for interactive mailbox operations but does not itself authorize a deployed web app.
 
