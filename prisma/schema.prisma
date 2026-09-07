@@ -4,7 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Vercel + Neon injects the pooled Prisma-compatible connection string under this name.
+  url      = env("DATABASE_POSTGRES_PRISMA_URL")
 }
 
 enum LeadStatus {
@@ -188,8 +189,8 @@ model EmailIntegration {
   accessTokenEncrypted String
   refreshTokenEncrypted String?
   expiresAt            DateTime?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
   workspace            Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   @@unique([workspaceId, provider])
 }
