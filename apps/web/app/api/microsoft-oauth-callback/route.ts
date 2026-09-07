@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@app/database";
 import { encryptToken } from "@/lib/email/token-crypto";
 
+const DEFAULT_WORKSPACE_ID = "default-workspace";
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -17,8 +19,8 @@ export async function GET(request: Request) {
   const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
   const tenant = process.env.MICROSOFT_TENANT_ID || "common";
   const redirectUri = process.env.MICROSOFT_REDIRECT_URI;
-  const workspaceId = process.env.DEFAULT_WORKSPACE_ID;
-  if (!clientId || !clientSecret || !redirectUri || !workspaceId) return NextResponse.json({ error: "Microsoft OAuth storage is not configured" }, { status: 500 });
+  const workspaceId = process.env.DEFAULT_WORKSPACE_ID || DEFAULT_WORKSPACE_ID;
+  if (!clientId || !clientSecret || !redirectUri) return NextResponse.json({ error: "Microsoft OAuth storage is not configured" }, { status: 500 });
 
   const tokenResponse = await fetch(`https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`, {
     method: "POST",
